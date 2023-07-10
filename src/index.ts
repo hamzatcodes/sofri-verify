@@ -3,13 +3,17 @@ import userRouter from "./routes/user";
 import AppError from "./utils/appError";
 import * as express from "express";
 import * as cors from "cors";
+import { config } from "dotenv";
 // import errorController from "./controllers/errorController";
+
+config();
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 app.options("*", cors());
 app.get("/", (req, res) => {
+    console.log(process.env.PORT);
     res.status(200).json({
         status: "success",
         message: "Welcome to sofri",
@@ -27,7 +31,7 @@ app.all("*", (req, res, next) => {
     next(new AppError(`Can't find ${req.originalUrl} on the server`, 404));
 });
 
-const port = process.env.PORT || 3000;
+const port = process.env.SERVER_PORT || 3000;
 app.listen(port, () => {
     console.log(`app running on port ${port}`);
 });

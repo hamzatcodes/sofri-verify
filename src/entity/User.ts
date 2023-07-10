@@ -15,7 +15,9 @@ export class User {
     })
     bvn: string;
 
-    @Column()
+    @Column({
+        default: "pending"
+    })
     status: string;
 
     @Column()

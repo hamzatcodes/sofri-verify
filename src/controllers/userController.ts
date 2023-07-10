@@ -1,3 +1,4 @@
+import { Response, Request, NextFunction } from "express";
 import { AppDataSource } from "../data-source";
 import { User } from "../entity/User";
 import AppError from "../utils/appError";
@@ -5,7 +6,7 @@ import catchAsync from "../utils/catchAsync";
 
 const userRepository = AppDataSource.getRepository(User);
 
-const getUsers = catchAsync(async (req, res, next) => {
+const getUsers = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const users = await userRepository.find();
 
     res.status(200).json({
@@ -16,12 +17,11 @@ const getUsers = catchAsync(async (req, res, next) => {
     });
 });
 
-const addUser = catchAsync(async (req, res, next) => {
+const addUser = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const user = new User();
     user.accountNumber = req.body.accountNumber;
     user.bvn = req.body.bvn;
     user.created = new Date();
-    user.status = "pending";
 
     const found = await userRepository.findOneBy({
         accountNumber: user.accountNumber,
@@ -45,8 +45,8 @@ const addUser = catchAsync(async (req, res, next) => {
     });
 });
 
-const verifyUser = catchAsync(async (req, res, next) => {
-    const user = await userRepository.findOneBy({ id: req.params.id });
+const verifyUser = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const user:any = await userRepository.findOneBy({ id: Number(req.params.id) });
     if (!user) {
         res.status(404).json({
             status: "fail",
@@ -55,7 +55,7 @@ const verifyUser = catchAsync(async (req, res, next) => {
 
         return;
     }
-    user.status = req.body.status
+    user.status = req.body.status;
     await userRepository.save(user);
 
     res.status(200).json({
