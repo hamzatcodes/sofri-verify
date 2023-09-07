@@ -3,7 +3,11 @@ import userController from "../controllers/userController";
 
 const userRouter = Router();
 
-userRouter.route("/").get(userController.getUsers).post(userController.addUser);
+userRouter
+    .route("/")
+    .get(userController.getUsers)
+    .post(userController.addUser)
+    .delete(userController.deleteUsers);
 
 userRouter.route("/:id").patch(userController.verifyUser);
 

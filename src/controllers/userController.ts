@@ -6,69 +6,88 @@ import catchAsync from "../utils/catchAsync";
 
 const userRepository = AppDataSource.getRepository(User);
 
-const getUsers = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const users = await userRepository.find();
+const getUsers = catchAsync(
+    async (req: Request, res: Response, next: NextFunction) => {
+        const users = await userRepository.find();
 
-    res.status(200).json({
-        status: "success",
-        data: {
-            users,
-        },
-    });
-});
+        res.status(200).json({
+            status: "success",
+            data: {
+                users,
+            },
+        });
+    }
+);
 
-const addUser = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const user = new User();
-    user.accountNumber = req.body.accountNumber;
-    user.bvn = req.body.bvn;
-    user.created = new Date();
+const addUser = catchAsync(
+    async (req: Request, res: Response, next: NextFunction) => {
+        const user = new User();
+        user.accountNumber = req.body.accountNumber;
+        user.bvn = req.body.bvn;
+        user.created = new Date();
 
-    const found = await userRepository.findOneBy({
-        accountNumber: user.accountNumber,
-        bvn: user.bvn,
-    });
-
-    if (found) {
-        res.status(400).json({
-            status: "fail",
-            error: "Acount Number or BVN already exists",
+        const found = await userRepository.findOneBy({
+            accountNumber: user.accountNumber,
+            bvn: user.bvn,
         });
 
-        return;
-    }
+        if (found) {
+            res.status(400).json({
+                status: "fail",
+                error: "Acount Number or BVN already exists",
+            });
 
-    await userRepository.save(user);
+            return;
+        }
 
-    res.status(200).json({
-        status: "success",
-        message: "Your KYC has been submitted and is being processed!",
-    });
-});
+        await userRepository.save(user);
 
-const verifyUser = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const user:any = await userRepository.findOneBy({ id: Number(req.params.id) });
-    if (!user) {
-        res.status(404).json({
-            status: "fail",
-            error: "No such record with the given ID",
+        res.status(200).json({
+            status: "success",
+            message: "Your KYC has been submitted and is being processed!",
         });
-
-        return;
     }
-    user.status = req.body.status;
-    await userRepository.save(user);
+);
 
-    res.status(200).json({
-        status: "success",
-        message:
-            user.status === "confirmed"
-                ? "User Account Confirmed"
-                : "User Account Declined",
-    });
-});
+const verifyUser = catchAsync(
+    async (req: Request, res: Response, next: NextFunction) => {
+        const user: any = await userRepository.findOneBy({
+            id: Number(req.params.id),
+        });
+        if (!user) {
+            res.status(404).json({
+                status: "fail",
+                error: "No such record with the given ID",
+            });
+
+            return;
+        }
+        user.status = req.body.status;
+        await userRepository.save(user);
+
+        res.status(200).json({
+            status: "success",
+            message:
+                user.status === "confirmed"
+                    ? "User Account Confirmed"
+                    : "User Account Declined",
+        });
+    }
+);
+
+const deleteUsers = catchAsync(
+    async (req: Request, res: Response, next: NextFunction) => {
+        await userRepository.delete({ status: "declined" });
+        res.status(204).json({
+            status: "success",
+            data: null,
+        });
+    }
+);
 
 export default {
     addUser,
     getUsers,
     verifyUser,
+    deleteUsers,
 };
